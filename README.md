@@ -20,7 +20,8 @@ Claude Code's built-in `--resume` picker is functional but minimal. cctv gives y
 ## Features
 
 - Lists all Claude Code sessions across all projects with metadata (summary, project, branch, PR links, message count, timestamps, running status)
-- Live filtering with prefix support (`project:`, `branch:`, `cwd:`, `pr:`)
+- Live filtering with regex support and prefix syntax (`project:`, `branch:`, `cwd:`, `pr:`)
+- Stats popup with token usage, cache hit rate, session duration, and model breakdown
 - Detail view with model info, token usage, prompt history, and PR details
 - Resume any session directly from the TUI — suspends cctv, launches Claude Code, returns when done
 - Non-interactive `list` subcommand with `--json` output for scripting
@@ -64,13 +65,15 @@ cctv --pwd        # filter to sessions from the present working directory
 
 #### Filtering
 
-Type bare text to search across all fields, or use a prefix to target a specific field:
+Type bare text to search across all fields, or use a prefix to target a specific field. All filter values support regex:
 
 ```
-project:kubevirt             # match project name or path
+project:kubevirt$            # exact project name (regex anchor)
+project:kubevirt             # substring match (also valid regex)
 branch:main                  # match git branch
 cwd:/home/user/project       # match working directory path
 pr:enhancements#242          # match PR repository or number
+branch:^feature/             # branches starting with feature/
 ```
 
 Multiple terms are ANDed together:
@@ -79,6 +82,8 @@ Multiple terms are ANDed together:
 project:kubevirt branch:main
 pr:242 branch:fix
 ```
+
+Invalid regex patterns fall back to substring matching.
 
 ### CLI
 
@@ -152,6 +157,9 @@ internal/
     styles.go                     # Lip Gloss styles
     list.go                       # Session list view
     detail.go                     # Session detail view
+    stats.go                      # Stats popup view
+demo/                             # Fake session data for demo recording
+demo.tape                         # VHS tape for generating demo.gif
 ```
 
 ## Dependencies

@@ -11,12 +11,13 @@ make build          # build to bin/cctv
 make test           # run tests via ginkgo
 make lint           # run golangci-lint
 make test-cover     # coverage report to coverage.html
+make demo           # regenerate demo.gif (requires vhs)
 ```
 
 ## Architecture
 
 - `internal/claude/` — data layer: parses `~/.claude/projects/*/sessions-index.json` (fast metadata), `*.jsonl` (full conversations with PR links, token usage, models), and `sessions/<pid>.json` (running session detection). The `Discoverer` merges all sources into a unified `[]Session` sorted by modified time.
-- `internal/tui/` — Bubble Tea TUI with three views (list, detail, and stats popup). The stats popup (`s` key) overlays the list with token usage, cache hit rate, and session duration. Filtering is live (updates on every keystroke) and supports prefix syntax (`project:`, `branch:`, `cwd:`, `pr:`). Multiple space-separated terms are ANDed.
+- `internal/tui/` — Bubble Tea TUI with three views (list, detail, and stats popup). The stats popup (`s` key) shows token usage, cache hit rate, and session duration. Filtering is live (updates on every keystroke) with regex support and prefix syntax (`project:`, `branch:`, `cwd:`, `pr:`). Multiple space-separated terms are ANDed. Invalid regex falls back to substring matching.
 - `internal/cmd/` — Cobra commands: root (launches TUI), `list` (non-interactive), `resume` (exec into claude), `version`.
 - `internal/claude/sanitize.go` — cleans raw prompts: extracts slash command names from XML tags, replaces `<local-command-caveat>` with `[local command]`, shortens URLs, strips remaining XML.
 
@@ -29,8 +30,10 @@ make test-cover     # coverage report to coverage.html
 
 ## Key design decisions
 
-- `tea.ExecProcess` suspends the TUI when resuming a session, returning to cctv after Claude exits. The command's `Dir` is set to `session.ProjectPath`.
+- `tea.ExecProcess` suspends the TUI when resuming a session, returning to cctv after Claude exits. The command's `Dir` is set to `session.ProjectPath` if the directory exists, otherwise it inherits the current directory.
 - JSONL parsing uses `bufio.Scanner` line-by-line for memory efficiency. `ParseJSONLMetadata` scans the full file to collect PR links. `ParseJSONLDetail` is loaded on-demand for the detail view.
-- PR links are deduplicated by `repo#number`.
+- PR links are deduplicated by `repo#number`. When a session exists in both the index and as a JSONL file, discovery parses the JSONL to extract PR links.
+- Filter values are compiled as case-insensitive regex patterns. Invalid patterns fall back to substring matching.
 - Sidechain sessions (subagent conversations) are filtered out.
 - Version is injected at build time via `-ldflags`.
+- `demo/` contains fake session data and a VHS tape for reproducible demo GIF generation via `make demo`.
