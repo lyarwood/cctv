@@ -42,8 +42,9 @@ run: build
 	./bin/$(BINARY)
 
 demo: build
-	@mkdir -p /tmp/cctv-demo/projects/demo-project /tmp/cctv-demo/sessions
+	@mkdir -p /tmp/cctv-demo/projects/demo-project /tmp/cctv-demo/sessions /tmp/cctv-demo/bin
 	@cp demo/sessions-index.json /tmp/cctv-demo/projects/demo-project/
 	@cp demo/*.jsonl /tmp/cctv-demo/projects/demo-project/
+	@cp demo/fake-claude.sh /tmp/cctv-demo/bin/claude
 	vhs demo.tape
 	@rm -rf /tmp/cctv-demo

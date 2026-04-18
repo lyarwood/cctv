@@ -6,9 +6,18 @@ Set Height 700
 Set FontSize 14
 Set Padding 20
 Set Theme "Catppuccin Mocha"
+Set TypingSpeed 50ms
 
 # demo/ contains the fake session data; the Makefile stages it into
 # the directory layout cctv expects before running this tape.
+# A fake claude script is placed in /tmp/cctv-demo/bin/ so resume works.
+
+# Put fake claude on PATH
+Hide
+Type "export PATH=/tmp/cctv-demo/bin:$PATH"
+Enter
+Sleep 500ms
+Show
 
 # --- TUI ---
 Type "./bin/cctv --claude-dir /tmp/cctv-demo"
@@ -55,7 +64,17 @@ Sleep 300ms
 Enter
 Sleep 1s
 
-# Show help
+# Resume a session - navigate to the API review session
+Down
+Sleep 300ms
+Down
+Sleep 300ms
+Down
+Sleep 300ms
+Enter
+Sleep 4s
+
+# Show help after returning from resume
 Type "?"
 Sleep 2s
 
