@@ -25,6 +25,7 @@ Claude Code's built-in `--resume` picker is functional but minimal. cctv gives y
 - Detail view with model info, token usage, prompt history, and PR details
 - Resume any session directly from the TUI — suspends cctv, launches Claude Code, returns when done
 - Non-interactive `list` subcommand with `--json` output for scripting
+- 5 built-in color themes (`default`, `catppuccin`, `dracula`, `nord`, `light`) via `--theme`
 - Sanitizes raw prompts — slash commands, local commands, and XML tags are cleaned up for readability
 
 ## Installation
@@ -84,6 +85,16 @@ pr:242 branch:fix
 ```
 
 Invalid regex patterns fall back to substring matching.
+
+#### Themes
+
+```sh
+cctv --theme catppuccin    # pastel purple/green
+cctv --theme dracula       # pink/purple from Dracula
+cctv --theme nord          # cool blue/green from Nord
+cctv --theme light         # high contrast for light terminals
+cctv --theme default       # the default theme
+```
 
 ### CLI
 
@@ -154,7 +165,8 @@ internal/
   tui/                            # Bubble Tea TUI
     model.go                      # Main model (Init/Update/View)
     keys.go                       # Key bindings
-    styles.go                     # Lip Gloss styles
+    theme.go                      # Theme definitions (default, catppuccin, dracula, nord, light)
+    styles.go                     # Lip Gloss styles (derived from active theme)
     list.go                       # Session list view
     detail.go                     # Session detail view
     stats.go                      # Stats popup view
