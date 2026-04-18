@@ -16,7 +16,7 @@ make test-cover     # coverage report to coverage.html
 ## Architecture
 
 - `internal/claude/` — data layer: parses `~/.claude/projects/*/sessions-index.json` (fast metadata), `*.jsonl` (full conversations with PR links, token usage, models), and `sessions/<pid>.json` (running session detection). The `Discoverer` merges all sources into a unified `[]Session` sorted by modified time.
-- `internal/tui/` — Bubble Tea TUI with two views (list and detail). Filtering is live (updates on every keystroke) and supports prefix syntax (`project:`, `branch:`, `cwd:`, `pr:`). Multiple space-separated terms are ANDed.
+- `internal/tui/` — Bubble Tea TUI with three views (list, detail, and stats popup). The stats popup (`s` key) overlays the list with token usage, cache hit rate, and session duration. Filtering is live (updates on every keystroke) and supports prefix syntax (`project:`, `branch:`, `cwd:`, `pr:`). Multiple space-separated terms are ANDed.
 - `internal/cmd/` — Cobra commands: root (launches TUI), `list` (non-interactive), `resume` (exec into claude), `version`.
 - `internal/claude/sanitize.go` — cleans raw prompts: extracts slash command names from XML tags, replaces `<local-command-caveat>` with `[local command]`, shortens URLs, strips remaining XML.
 

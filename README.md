@@ -39,6 +39,7 @@ cctv --pwd        # filter to sessions from the present working directory
 |---|---|
 | `enter` | Resume selected session |
 | `d` / `space` | View session details |
+| `s` | Session stats popup (token usage, cache hit rate, duration) |
 | `/` | Open filter input |
 | `tab` | Cycle filter prefix (`project:`, `branch:`, `cwd:`, `pr:`) |
 | `r` | Refresh session list |

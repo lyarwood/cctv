@@ -26,6 +26,7 @@ type viewState int
 const (
 	viewList viewState = iota
 	viewDetail
+	viewStats
 )
 
 type detailLoadedMsg struct {
@@ -111,10 +112,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.filtering {
 			return m.updateFiltering(msg)
 		}
-		if m.view == viewDetail {
+		switch m.view {
+		case viewDetail:
 			return m.updateDetail(msg)
+		case viewStats:
+			return m.updateStats(msg)
+		default:
+			return m.updateList(msg)
 		}
-		return m.updateList(msg)
 	}
 
 	return m, nil
@@ -150,6 +155,15 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			return m, m.loadDetail(session)
 		}
 
+	case matchKey(msg, keys.Stats):
+		if len(m.filtered) > 0 {
+			m.view = viewStats
+			m.detail = nil
+			m.err = nil
+			session := m.filtered[m.cursor]
+			return m, m.loadDetail(session)
+		}
+
 	case matchKey(msg, keys.Filter):
 		m.filtering = true
 		m.filterInput.Focus()
@@ -176,6 +190,24 @@ func (m Model) updateDetail(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			session := m.filtered[m.cursor]
 			return m, resumeSession(session)
 		}
+	}
+
+	return m, nil
+}
+
+func (m Model) updateStats(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch {
+	case matchKey(msg, keys.Back), matchKey(msg, keys.Quit), matchKey(msg, keys.Stats):
+		m.view = viewList
+		m.detail = nil
+
+	case matchKey(msg, keys.Enter):
+		if len(m.filtered) > 0 {
+			return m, resumeSession(m.filtered[m.cursor])
+		}
+
+	case matchKey(msg, keys.Detail):
+		m.view = viewDetail
 	}
 
 	return m, nil
@@ -326,6 +358,12 @@ func (m Model) View() string {
 		if len(m.filtered) > 0 {
 			content = renderDetail(m.filtered[m.cursor], m.detail, m.width, m.height-3)
 		}
+	case viewStats:
+		if len(m.filtered) > 0 {
+			listBg := renderSessionList(m.filtered, m.cursor, m.width, m.height-3, m.filterText)
+			popup := renderStats(m.filtered[m.cursor], m.detail, m.width, m.height-3)
+			content = overlayCenter(listBg, popup, m.width, m.height-3)
+		}
 	}
 
 	if m.err != nil {
@@ -338,7 +376,7 @@ func (m Model) View() string {
 	} else if m.filterText != "" {
 		footer = helpStyle.Render("active filter: "+m.filterText+"  /:edit  ?:help  q:quit")
 	} else if m.showHelp {
-		footer = helpStyle.Render("enter:resume  d/space:detail  /:filter  r:refresh  ?:help  esc:back  q:quit")
+		footer = helpStyle.Render("enter:resume  d/space:detail  s:stats  /:filter  r:refresh  ?:help  esc:back  q:quit")
 	} else {
 		footer = helpStyle.Render("?:help  q:quit")
 	}

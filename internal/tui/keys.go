@@ -7,6 +7,7 @@ type keyMap struct {
 	Down    key.Binding
 	Enter   key.Binding
 	Detail  key.Binding
+	Stats   key.Binding
 	Filter  key.Binding
 	Refresh key.Binding
 	Help    key.Binding
@@ -30,6 +31,10 @@ var keys = keyMap{
 	Detail: key.NewBinding(
 		key.WithKeys("d", " "),
 		key.WithHelp("d/space", "view details"),
+	),
+	Stats: key.NewBinding(
+		key.WithKeys("s"),
+		key.WithHelp("s", "session stats"),
 	),
 	Filter: key.NewBinding(
 		key.WithKeys("/"),
