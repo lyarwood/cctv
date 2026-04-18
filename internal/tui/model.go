@@ -273,24 +273,24 @@ func (m *Model) applyFilter(text string) {
 	if text == "" {
 		m.filtered = m.sessions
 	} else {
-		m.filtered = matchSessions(m.sessions, text)
+		m.filtered = MatchSessions(m.sessions, text)
 	}
 	if m.cursor >= len(m.filtered) {
 		m.cursor = max(0, len(m.filtered)-1)
 	}
 }
 
-func matchSessions(sessions []claude.Session, text string) []claude.Session {
+func MatchSessions(sessions []claude.Session, text string) []claude.Session {
 	var filtered []claude.Session
 	for _, s := range sessions {
-		if matchSession(s, text) {
+		if MatchSession(s, text) {
 			filtered = append(filtered, s)
 		}
 	}
 	return filtered
 }
 
-func matchSession(s claude.Session, text string) bool {
+func MatchSession(s claude.Session, text string) bool {
 	for _, term := range strings.Fields(text) {
 		if !matchTerm(s, term) {
 			return false

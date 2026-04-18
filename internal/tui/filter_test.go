@@ -1,13 +1,14 @@
-package tui
+package tui_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/lyarwood/cctv/internal/claude"
+	"github.com/lyarwood/cctv/internal/tui"
 )
 
-var _ = Describe("matchSession", func() {
+var _ = Describe("MatchSession", func() {
 	var s claude.Session
 
 	BeforeEach(func() {
@@ -24,7 +25,7 @@ var _ = Describe("matchSession", func() {
 
 	DescribeTable("bare text",
 		func(text string, expected bool) {
-			Expect(matchSession(s, text)).To(Equal(expected))
+			Expect(tui.MatchSession(s, text)).To(Equal(expected))
 		},
 		Entry("matches summary", "unit tests", true),
 		Entry("matches first prompt", "write tests", true),
@@ -36,7 +37,7 @@ var _ = Describe("matchSession", func() {
 
 	DescribeTable("project prefix",
 		func(text string, expected bool) {
-			Expect(matchSession(s, text)).To(Equal(expected))
+			Expect(tui.MatchSession(s, text)).To(Equal(expected))
 		},
 		Entry("matches basename", "project:myproject", true),
 		Entry("matches full path", "project:/home/user", true),
@@ -46,7 +47,7 @@ var _ = Describe("matchSession", func() {
 
 	DescribeTable("branch prefix",
 		func(text string, expected bool) {
-			Expect(matchSession(s, text)).To(Equal(expected))
+			Expect(tui.MatchSession(s, text)).To(Equal(expected))
 		},
 		Entry("matches", "branch:feature/auth", true),
 		Entry("partial match", "branch:auth", true),
@@ -56,7 +57,7 @@ var _ = Describe("matchSession", func() {
 
 	DescribeTable("cwd prefix",
 		func(text string, expected bool) {
-			Expect(matchSession(s, text)).To(Equal(expected))
+			Expect(tui.MatchSession(s, text)).To(Equal(expected))
 		},
 		Entry("matches path", "cwd:/home/user", true),
 		Entry("partial match", "cwd:myproject", true),
@@ -66,7 +67,7 @@ var _ = Describe("matchSession", func() {
 
 	DescribeTable("pr prefix",
 		func(text string, expected bool) {
-			Expect(matchSession(s, text)).To(Equal(expected))
+			Expect(tui.MatchSession(s, text)).To(Equal(expected))
 		},
 		Entry("matches repo", "pr:user/myproject", true),
 		Entry("matches number", "pr:42", true),
@@ -77,7 +78,7 @@ var _ = Describe("matchSession", func() {
 
 	DescribeTable("unknown prefix",
 		func(text string, expected bool) {
-			Expect(matchSession(s, text)).To(Equal(expected))
+			Expect(tui.MatchSession(s, text)).To(Equal(expected))
 		},
 		Entry("falls through to bare search", "foo:bar", false),
 		Entry("no match", "Go:whatever", false),
@@ -85,7 +86,7 @@ var _ = Describe("matchSession", func() {
 
 	DescribeTable("combined filters",
 		func(text string, expected bool) {
-			Expect(matchSession(s, text)).To(Equal(expected))
+			Expect(tui.MatchSession(s, text)).To(Equal(expected))
 		},
 		Entry("project and branch", "project:myproject branch:auth", true),
 		Entry("project and branch mismatch", "project:myproject branch:main", false),
@@ -97,7 +98,7 @@ var _ = Describe("matchSession", func() {
 
 	DescribeTable("regex patterns",
 		func(text string, expected bool) {
-			Expect(matchSession(s, text)).To(Equal(expected))
+			Expect(tui.MatchSession(s, text)).To(Equal(expected))
 		},
 		Entry("anchor end", "project:myproject$", true),
 		Entry("anchor end excludes partial", "project:myprojec$", false),
@@ -113,7 +114,7 @@ var _ = Describe("matchSession", func() {
 	)
 })
 
-var _ = Describe("matchSessions", func() {
+var _ = Describe("MatchSessions", func() {
 	var sessions []claude.Session
 
 	BeforeEach(func() {
@@ -125,30 +126,30 @@ var _ = Describe("matchSessions", func() {
 	})
 
 	It("filters by project", func() {
-		got := matchSessions(sessions, "project:auth")
+		got := tui.MatchSessions(sessions, "project:auth")
 		Expect(got).To(HaveLen(1))
 		Expect(got[0].Summary).To(Equal("Auth work"))
 	})
 
 	It("filters by branch", func() {
-		Expect(matchSessions(sessions, "branch:main")).To(HaveLen(2))
+		Expect(tui.MatchSessions(sessions, "branch:main")).To(HaveLen(2))
 	})
 
 	It("searches all fields with bare text", func() {
-		Expect(matchSessions(sessions, "work")).To(HaveLen(3))
+		Expect(tui.MatchSessions(sessions, "work")).To(HaveLen(3))
 	})
 
 	It("returns empty for no matches", func() {
-		Expect(matchSessions(sessions, "branch:release")).To(BeEmpty())
+		Expect(tui.MatchSessions(sessions, "branch:release")).To(BeEmpty())
 	})
 
 	It("narrows with combined filters", func() {
-		got := matchSessions(sessions, "project:auth branch:main")
+		got := tui.MatchSessions(sessions, "project:auth branch:main")
 		Expect(got).To(HaveLen(1))
 		Expect(got[0].Summary).To(Equal("Auth work"))
 	})
 
 	It("returns empty for combined filters with no overlap", func() {
-		Expect(matchSessions(sessions, "project:api branch:main")).To(BeEmpty())
+		Expect(tui.MatchSessions(sessions, "project:api branch:main")).To(BeEmpty())
 	})
 })

@@ -24,6 +24,7 @@ make demo           # regenerate demo.gif (requires vhs)
 ## Testing conventions
 
 - Use Ginkgo v2 (`github.com/onsi/ginkgo/v2`) and Gomega for all tests.
+- Tests use external test packages (`package claude_test`, `package tui_test`) to test only public APIs.
 - Test fixtures live in `internal/claude/testdata/`.
 - Each Ginkgo test package has a `*_suite_test.go` bootstrap file.
 
