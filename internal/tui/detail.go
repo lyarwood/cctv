@@ -86,7 +86,7 @@ func renderDetail(session claude.Session, detail *claude.SessionDetail, width, h
 					ts = dimStyle.Render(p.Timestamp.Format("15:04:05")) + " "
 				}
 				prompt := truncateStr(p.Content, 80)
-				b.WriteString(fmt.Sprintf("  %d. %s%s\n", i+1, ts, prompt))
+				fmt.Fprintf(&b, "  %d. %s%s\n", i+1, ts, prompt)
 			}
 		}
 	} else if session.HasJSONL {
