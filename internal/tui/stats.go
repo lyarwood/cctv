@@ -37,7 +37,7 @@ var (
 			Foreground(lipgloss.Color("240"))
 )
 
-func renderStats(session claude.Session, detail *claude.SessionDetail, width, height int) string {
+func renderStats(session claude.Session, detail *claude.SessionDetail, width int) string {
 	var b strings.Builder
 
 	b.WriteString(lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("205")).Render("Session Stats"))
@@ -135,7 +135,7 @@ func renderStats(session claude.Session, detail *claude.SessionDetail, width, he
 	b.WriteString("\n")
 	b.WriteString(dimStyle.Render("esc:close  d:detail  enter:resume"))
 
-	popupWidth := width/2 - 2
+	popupWidth := width*2/3 - 2
 	if popupWidth < 50 {
 		popupWidth = 50
 	}
@@ -145,12 +145,12 @@ func renderStats(session claude.Session, detail *claude.SessionDetail, width, he
 		Render(b.String())
 }
 
-func renderBar(pct float64, width int) string {
-	filled := int(pct / 100 * float64(width))
-	if filled > width {
-		filled = width
+func renderBar(pct float64, barWidth int) string {
+	filled := int(pct / 100 * float64(barWidth))
+	if filled > barWidth {
+		filled = barWidth
 	}
-	empty := width - filled
+	empty := barWidth - filled
 	return statsBarFill.Render(strings.Repeat("█", filled)) +
 		statsBarEmpty.Render(strings.Repeat("░", empty))
 }
@@ -168,54 +168,4 @@ func formatDuration(d time.Duration) string {
 	days := int(d.Hours()) / 24
 	hours := int(d.Hours()) % 24
 	return fmt.Sprintf("%dd %dh", days, hours)
-}
-
-func overlayCenter(bg, popup string, width, height int) string {
-	bgLines := strings.Split(bg, "\n")
-	popupLines := strings.Split(popup, "\n")
-
-	popupHeight := len(popupLines)
-	popupWidth := 0
-	for _, line := range popupLines {
-		if w := lipgloss.Width(line); w > popupWidth {
-			popupWidth = w
-		}
-	}
-
-	startRow := (height - popupHeight) / 2
-	if startRow < 0 {
-		startRow = 0
-	}
-	startCol := (width - popupWidth) / 2
-	if startCol < 0 {
-		startCol = 0
-	}
-
-	for len(bgLines) < height {
-		bgLines = append(bgLines, strings.Repeat(" ", width))
-	}
-
-	for i, popupLine := range popupLines {
-		row := startRow + i
-		if row >= len(bgLines) {
-			break
-		}
-		bgLine := bgLines[row]
-		bgRunes := []rune(bgLine)
-
-		for len(bgRunes) < width {
-			bgRunes = append(bgRunes, ' ')
-		}
-
-		prefix := string(bgRunes[:startCol])
-		popupEnd := startCol + popupWidth
-		suffix := ""
-		if popupEnd < len(bgRunes) {
-			suffix = string(bgRunes[popupEnd:])
-		}
-
-		bgLines[row] = prefix + popupLine + suffix
-	}
-
-	return strings.Join(bgLines[:height], "\n")
 }

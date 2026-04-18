@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/lyarwood/cctv/internal/claude"
 )
@@ -360,9 +361,8 @@ func (m Model) View() string {
 		}
 	case viewStats:
 		if len(m.filtered) > 0 {
-			listBg := renderSessionList(m.filtered, m.cursor, m.width, m.height-3, m.filterText)
-			popup := renderStats(m.filtered[m.cursor], m.detail, m.width, m.height-3)
-			content = overlayCenter(listBg, popup, m.width, m.height-3)
+			popup := renderStats(m.filtered[m.cursor], m.detail, m.width)
+			content = lipgloss.Place(m.width, m.height-3, lipgloss.Center, lipgloss.Center, popup)
 		}
 	}
 
