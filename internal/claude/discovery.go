@@ -79,7 +79,11 @@ func (d *Discoverer) discoverProject(projectDir string) ([]Session, error) {
 			for i := range sessions {
 				if sessions[i].SessionID == sessionID {
 					sessions[i].HasJSONL = true
+					sessions[i].FullPath = path
 					sessions[i].Source = SourceBoth
+					if parsed, err := ParseJSONLMetadata(path); err == nil {
+						sessions[i].PRLinks = parsed.PRLinks
+					}
 					break
 				}
 			}
