@@ -169,3 +169,15 @@ demo.tape                         # VHS tape for generating demo.gif
 - [Bubbles](https://github.com/charmbracelet/bubbles) - TUI components
 - [Cobra](https://github.com/spf13/cobra) - CLI framework
 - [Ginkgo](https://github.com/onsi/ginkgo) / [Gomega](https://github.com/onsi/gomega) - Testing
+
+## Contributing
+
+Contributions are welcome! This project was built around my own workflow, so there are almost certainly use cases, filters, or data sources I've missed. If you have ideas or run into issues, please open an [issue](https://github.com/lyarwood/cctv/issues) or submit a PR.
+
+Some areas that could use help:
+
+- Additional themes or theme customization via config file
+- New filter prefixes (e.g. `model:`, `status:`)
+- Session sorting options (by tokens, message count, duration)
+- Support for other conversation metadata not yet surfaced
+- Packaging for Homebrew, Nix, or other package managers
