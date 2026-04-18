@@ -3,51 +3,102 @@ package tui
 import "github.com/charmbracelet/lipgloss"
 
 var (
+	titleStyle         lipgloss.Style
+	statusBarStyle     lipgloss.Style
+	runningStyle       lipgloss.Style
+	selectedStyle      lipgloss.Style
+	dimStyle           lipgloss.Style
+	detailBorderStyle  lipgloss.Style
+	detailLabelStyle   lipgloss.Style
+	detailValueStyle   lipgloss.Style
+	headerStyle        lipgloss.Style
+	errorStyle         lipgloss.Style
+	helpStyle          lipgloss.Style
+	statsPopupStyle    lipgloss.Style
+	statsSectionStyle  lipgloss.Style
+	statsLabelStyle    lipgloss.Style
+	statsValueStyle    lipgloss.Style
+	statsBarFill       lipgloss.Style
+	statsBarEmpty      lipgloss.Style
+)
+
+func init() {
+	applyTheme()
+}
+
+func applyTheme() {
+	t := activeTheme
+
 	titleStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(lipgloss.Color("205")).
-			Padding(0, 1)
+		Bold(true).
+		Foreground(t.Accent).
+		Padding(0, 1)
 
 	statusBarStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("240")).
-			Padding(0, 1)
+		Foreground(t.Dim).
+		Padding(0, 1)
 
 	runningStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("42")).
-			Bold(true)
+		Foreground(t.Running).
+		Bold(true)
 
 	selectedStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(lipgloss.Color("255")).
-			Background(lipgloss.Color("57"))
+		Bold(true).
+		Foreground(t.SelectedFg).
+		Background(t.SelectedBg)
 
 	dimStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("240"))
+		Foreground(t.Dim)
 
 	detailBorderStyle = lipgloss.NewStyle().
-				Border(lipgloss.RoundedBorder()).
-				BorderForeground(lipgloss.Color("62")).
-				Padding(1, 2)
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(t.Border).
+		Padding(1, 2)
 
 	detailLabelStyle = lipgloss.NewStyle().
-				Bold(true).
-				Foreground(lipgloss.Color("205")).
-				Width(16)
+		Bold(true).
+		Foreground(t.Accent).
+		Width(16)
 
 	detailValueStyle = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("252"))
+		Foreground(t.Text)
 
 	headerStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(lipgloss.Color("252")).
-			BorderBottom(true).
-			BorderStyle(lipgloss.NormalBorder()).
-			BorderForeground(lipgloss.Color("240"))
+		Bold(true).
+		Foreground(t.Text).
+		BorderBottom(true).
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(t.Dim)
 
 	errorStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("196")).
-			Bold(true)
+		Foreground(t.Error).
+		Bold(true)
 
 	helpStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("240"))
-)
+		Foreground(t.Dim)
+
+	statsPopupStyle = lipgloss.NewStyle().
+		Border(lipgloss.DoubleBorder()).
+		BorderForeground(t.Accent).
+		Padding(1, 3).
+		Background(t.StatsBg)
+
+	statsSectionStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(t.Accent).
+		MarginTop(1)
+
+	statsLabelStyle = lipgloss.NewStyle().
+		Foreground(t.Text).
+		Width(20)
+
+	statsValueStyle = lipgloss.NewStyle().
+		Foreground(t.StatsHighlight).
+		Bold(true)
+
+	statsBarFill = lipgloss.NewStyle().
+		Foreground(t.BarFill)
+
+	statsBarEmpty = lipgloss.NewStyle().
+		Foreground(t.BarEmpty)
+}

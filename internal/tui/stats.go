@@ -10,33 +10,6 @@ import (
 	"github.com/lyarwood/cctv/internal/claude"
 )
 
-var (
-	statsPopupStyle = lipgloss.NewStyle().
-			Border(lipgloss.DoubleBorder()).
-			BorderForeground(lipgloss.Color("205")).
-			Padding(1, 3).
-			Background(lipgloss.Color("235"))
-
-	statsSectionStyle = lipgloss.NewStyle().
-				Bold(true).
-				Foreground(lipgloss.Color("205")).
-				MarginTop(1)
-
-	statsLabelStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("252")).
-			Width(20)
-
-	statsValueStyle = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("42")).
-			Bold(true)
-
-	statsBarFill = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("42"))
-
-	statsBarEmpty = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("240"))
-)
-
 func renderStats(session claude.Session, detail *claude.SessionDetail, width int) string {
 	var b strings.Builder
 
