@@ -61,6 +61,18 @@ func TestMatchSession(t *testing.T) {
 		{"combined bare and prefix mismatch", "unit project:other", false},
 		{"multiple bare terms", "unit Go", true},
 		{"multiple bare terms one missing", "unit Python", false},
+
+		{"regex anchor end", "project:myproject$", true},
+		{"regex anchor end excludes partial", "project:myprojec$", false},
+		{"regex anchor start", "project:^myproject", true},
+		{"regex dot star", "project:my.*ject", true},
+		{"regex bare matches field end", "tests\\?$", true},
+		{"regex bare no match", "^Python", false},
+		{"regex branch anchor", "branch:auth$", true},
+		{"regex branch excludes", "branch:^auth$", false},
+		{"regex pr number", "pr:#42$", true},
+		{"invalid regex falls back to substring", "project:myproject", true},
+		{"invalid regex bracket literal", "project:my[", false},
 	}
 
 	for _, tt := range tests {

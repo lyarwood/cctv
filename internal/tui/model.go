@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -298,36 +299,41 @@ func matchSession(s claude.Session, text string) bool {
 func matchTerm(s claude.Session, term string) bool {
 	prefix, query, hasPrefix := strings.Cut(term, ":")
 	if hasPrefix {
-		lower := strings.ToLower(query)
 		switch strings.ToLower(prefix) {
 		case "project":
-			return strings.Contains(strings.ToLower(filepath.Base(s.ProjectPath)), lower) ||
-				strings.Contains(strings.ToLower(s.ProjectPath), lower)
+			return flexMatch(filepath.Base(s.ProjectPath), query) ||
+				flexMatch(s.ProjectPath, query)
 		case "branch":
-			return strings.Contains(strings.ToLower(s.GitBranch), lower)
+			return flexMatch(s.GitBranch, query)
 		case "cwd":
-			return strings.Contains(strings.ToLower(s.ProjectPath), lower)
+			return flexMatch(s.ProjectPath, query)
 		case "pr":
-			return matchPRLinks(s.PRLinks, lower)
+			return matchPRLinks(s.PRLinks, query)
 		}
 	}
 
-	lower := strings.ToLower(term)
-	return strings.Contains(strings.ToLower(s.Summary), lower) ||
-		strings.Contains(strings.ToLower(s.FirstPrompt), lower) ||
-		strings.Contains(strings.ToLower(s.ProjectPath), lower) ||
-		strings.Contains(strings.ToLower(s.GitBranch), lower)
+	return flexMatch(s.Summary, term) ||
+		flexMatch(s.FirstPrompt, term) ||
+		flexMatch(s.ProjectPath, term) ||
+		flexMatch(s.GitBranch, term)
 }
 
 func matchPRLinks(links []claude.PRLink, query string) bool {
 	for _, pr := range links {
 		display := fmt.Sprintf("%s#%d", pr.Repository, pr.Number)
-		if strings.Contains(strings.ToLower(display), query) ||
-			strings.Contains(strings.ToLower(pr.URL), query) {
+		if flexMatch(display, query) || flexMatch(pr.URL, query) {
 			return true
 		}
 	}
 	return false
+}
+
+func flexMatch(text, pattern string) bool {
+	re, err := regexp.Compile("(?i)" + pattern)
+	if err != nil {
+		return strings.Contains(strings.ToLower(text), strings.ToLower(pattern))
+	}
+	return re.MatchString(text)
 }
 
 func (m Model) loadDetail(session claude.Session) tea.Cmd {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -72,24 +73,23 @@ func filterSessions(sessions []claude.Session) []claude.Session {
 	var filtered []claude.Session
 	for _, s := range sessions {
 		if listProject != "" {
-			lower := strings.ToLower(listProject)
-			if !strings.Contains(strings.ToLower(filepath.Base(s.ProjectPath)), lower) &&
-				!strings.Contains(strings.ToLower(s.ProjectPath), lower) {
+			if !flexMatch(filepath.Base(s.ProjectPath), listProject) &&
+				!flexMatch(s.ProjectPath, listProject) {
 				continue
 			}
 		}
 		if listBranch != "" {
-			if !strings.Contains(strings.ToLower(s.GitBranch), strings.ToLower(listBranch)) {
+			if !flexMatch(s.GitBranch, listBranch) {
 				continue
 			}
 		}
 		if listCWD != "" {
-			if !strings.Contains(strings.ToLower(s.ProjectPath), strings.ToLower(listCWD)) {
+			if !flexMatch(s.ProjectPath, listCWD) {
 				continue
 			}
 		}
 		if listPR != "" {
-			if !matchPRLinks(s.PRLinks, strings.ToLower(listPR)) {
+			if !matchPRLinks(s.PRLinks, listPR) {
 				continue
 			}
 		}
@@ -101,12 +101,19 @@ func filterSessions(sessions []claude.Session) []claude.Session {
 func matchPRLinks(links []claude.PRLink, query string) bool {
 	for _, pr := range links {
 		display := fmt.Sprintf("%s#%d", pr.Repository, pr.Number)
-		if strings.Contains(strings.ToLower(display), query) ||
-			strings.Contains(strings.ToLower(pr.URL), query) {
+		if flexMatch(display, query) || flexMatch(pr.URL, query) {
 			return true
 		}
 	}
 	return false
+}
+
+func flexMatch(text, pattern string) bool {
+	re, err := regexp.Compile("(?i)" + pattern)
+	if err != nil {
+		return strings.Contains(strings.ToLower(text), strings.ToLower(pattern))
+	}
+	return re.MatchString(text)
 }
 
 func printJSON(sessions []claude.Session) error {
