@@ -2,6 +2,19 @@
 
 A terminal UI for browsing and resuming [Claude Code](https://docs.anthropic.com/en/docs/claude-code) conversations from the local filesystem.
 
+## Why resume conversations?
+
+Claude Code conversations accumulate valuable context as you work — the files you've discussed, decisions you've made, bugs you've investigated, and the mental model Claude has built of your codebase. Starting a fresh conversation throws all of that away, forcing you to re-explain context and watch Claude re-discover things it already knew.
+
+Resuming a conversation lets you:
+
+- **Continue where you left off** — pick up a debugging session, code review, or refactor without re-establishing context
+- **Reduce token usage** — resumed sessions carry forward their prompt cache, avoiding the cost of Claude re-reading your codebase from scratch
+- **Maintain coherence across sessions** — when you step away and come back hours or days later, the conversation still remembers what was agreed, what was tried, and what's left to do
+- **Switch between workstreams** — jump between a PR review on one branch and a feature implementation on another, each with its own accumulated context
+
+Claude Code's built-in `--resume` picker is functional but minimal. cctv gives you a richer view across all your projects — filterable by project, branch, PR, or working directory — so you can quickly find and resume the right conversation.
+
 ## Features
 
 - Lists all Claude Code sessions across all projects with metadata (summary, project, branch, PR links, message count, timestamps, running status)
