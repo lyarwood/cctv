@@ -2,6 +2,8 @@
 
 A terminal UI for browsing and resuming [Claude Code](https://docs.anthropic.com/en/docs/claude-code) conversations from the local filesystem.
 
+![cctv demo](demo.gif)
+
 ## Why resume conversations?
 
 Claude Code conversations accumulate valuable context as you work — the files you've discussed, decisions you've made, bugs you've investigated, and the mental model Claude has built of your codebase. Starting a fresh conversation throws all of that away, forcing you to re-explain context and watch Claude re-discover things it already knew.
