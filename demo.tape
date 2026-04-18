@@ -38,23 +38,21 @@ Sleep 3s
 Escape
 Sleep 1s
 
-# Filter by project (regex)
+# Filter by project (regex) - Enter to apply
 Type "/"
 Sleep 500ms
 Type "project:backend$"
+Enter
 Sleep 2s
-Escape
-Sleep 1s
 
-# Filter by PR
+# Filter by PR - clear previous, type new, Enter to apply
 Type "/"
 Sleep 300ms
 Ctrl+U
 Sleep 300ms
 Type "pr:webapp"
+Enter
 Sleep 2s
-Escape
-Sleep 1s
 
 # Clear filter and show all
 Type "/"
