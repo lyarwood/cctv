@@ -5,7 +5,7 @@ LDFLAGS    := -ldflags "-X '$(MODULE)/internal/cmd.Version=$(VERSION)'"
 GO         := go
 GINKGO     := ginkgo
 
-.PHONY: all build test test-verbose test-cover lint fmt vet clean install run
+.PHONY: all build test test-verbose test-cover lint fmt vet clean install run demo
 
 all: build
 
@@ -40,3 +40,10 @@ install: build
 
 run: build
 	./bin/$(BINARY)
+
+demo: build
+	@mkdir -p /tmp/cctv-demo/projects/demo-project /tmp/cctv-demo/sessions
+	@cp demo/sessions-index.json /tmp/cctv-demo/projects/demo-project/
+	@cp demo/*.jsonl /tmp/cctv-demo/projects/demo-project/
+	vhs demo.tape
+	@rm -rf /tmp/cctv-demo

@@ -127,6 +127,7 @@ cctv reads Claude Code's local storage under `~/.claude/`:
 | `make clean` | Remove build artifacts |
 | `make install` | Build and install to `$GOPATH/bin` |
 | `make run` | Build and run |
+| `make demo` | Regenerate `demo.gif` from `demo/` data and `demo.tape` (requires [vhs](https://github.com/charmbracelet/vhs)) |
 
 ### Project structure
 

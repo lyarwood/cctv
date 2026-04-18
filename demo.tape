@@ -1,4 +1,5 @@
 Output demo.gif
+Require ./bin/cctv
 Set Shell bash
 Set Width 1400
 Set Height 700
@@ -6,6 +7,8 @@ Set FontSize 14
 Set Padding 20
 Set Theme "Catppuccin Mocha"
 
+# demo/ contains the fake session data; the Makefile stages it into
+# the directory layout cctv expects before running this tape.
 Type "./bin/cctv --claude-dir /tmp/cctv-demo"
 Enter
 Sleep 2s
