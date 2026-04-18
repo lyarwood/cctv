@@ -42,7 +42,7 @@ run: build
 	./bin/$(BINARY)
 
 demo: build
-	@mkdir -p /tmp/cctv-demo/projects/demo-project /tmp/cctv-demo/sessions /tmp/cctv-demo/bin
+	@mkdir -p /tmp/cctv-demo/projects/demo-project /tmp/cctv-demo/sessions /tmp/cctv-demo/bin /tmp/cctv-demo/webapp /tmp/cctv-demo/backend /tmp/cctv-demo/infra
 	@cp demo/sessions-index.json /tmp/cctv-demo/projects/demo-project/
 	@cp demo/*.jsonl /tmp/cctv-demo/projects/demo-project/
 	@cp demo/fake-claude.sh /tmp/cctv-demo/bin/claude

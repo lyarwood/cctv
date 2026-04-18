@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -17,7 +18,9 @@ import (
 
 func resumeSession(session claude.Session) tea.Cmd {
 	c := exec.Command("claude", "--resume", session.SessionID)
-	c.Dir = session.ProjectPath
+	if info, err := os.Stat(session.ProjectPath); err == nil && info.IsDir() {
+		c.Dir = session.ProjectPath
+	}
 	return tea.ExecProcess(c, func(err error) tea.Msg {
 		return sessionResumedMsg{err: err}
 	})

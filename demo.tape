@@ -12,15 +12,9 @@ Set TypingSpeed 50ms
 # the directory layout cctv expects before running this tape.
 # A fake claude script is placed in /tmp/cctv-demo/bin/ so resume works.
 
-# Put fake claude on PATH
-Hide
-Type "export PATH=/tmp/cctv-demo/bin:$PATH"
-Enter
-Sleep 500ms
-Show
-
 # --- TUI ---
-Type "./bin/cctv --claude-dir /tmp/cctv-demo"
+# Use the fake claude from the demo staging area
+Type "PATH=/tmp/cctv-demo/bin:$PATH ./bin/cctv --claude-dir /tmp/cctv-demo"
 Enter
 Sleep 2s
 
@@ -70,7 +64,10 @@ Sleep 300ms
 Down
 Sleep 300ms
 Enter
-Sleep 4s
+Sleep 3s
+# Press a key to dismiss the fake claude session and return to cctv
+Type " "
+Sleep 1s
 
 # Show help after returning from resume
 Type "?"

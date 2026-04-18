@@ -11,7 +11,7 @@
       "created": "2026-04-18T09:00:00.000Z",
       "modified": "2026-04-18T10:30:00.000Z",
       "gitBranch": "feature/auth",
-      "projectPath": "/home/dev/webapp",
+      "projectPath": "/tmp/cctv-demo/webapp",
       "isSidechain": false
     },
     {
@@ -24,7 +24,7 @@
       "created": "2026-04-17T14:00:00.000Z",
       "modified": "2026-04-17T15:20:00.000Z",
       "gitBranch": "fix/worker-race",
-      "projectPath": "/home/dev/backend",
+      "projectPath": "/tmp/cctv-demo/backend",
       "isSidechain": false
     },
     {
@@ -37,7 +37,7 @@
       "created": "2026-04-16T10:00:00.000Z",
       "modified": "2026-04-16T12:45:00.000Z",
       "gitBranch": "refactor/db-pool",
-      "projectPath": "/home/dev/backend",
+      "projectPath": "/tmp/cctv-demo/backend",
       "isSidechain": false
     },
     {
@@ -50,7 +50,7 @@
       "created": "2026-04-15T09:00:00.000Z",
       "modified": "2026-04-15T11:00:00.000Z",
       "gitBranch": "feature/api-v2",
-      "projectPath": "/home/dev/webapp",
+      "projectPath": "/tmp/cctv-demo/webapp",
       "isSidechain": false
     },
     {
@@ -63,7 +63,7 @@
       "created": "2026-04-14T13:00:00.000Z",
       "modified": "2026-04-14T14:30:00.000Z",
       "gitBranch": "feature/metrics",
-      "projectPath": "/home/dev/backend",
+      "projectPath": "/tmp/cctv-demo/backend",
       "isSidechain": false
     },
     {
@@ -76,7 +76,7 @@
       "created": "2026-04-13T10:00:00.000Z",
       "modified": "2026-04-13T12:00:00.000Z",
       "gitBranch": "test/checkout-e2e",
-      "projectPath": "/home/dev/webapp",
+      "projectPath": "/tmp/cctv-demo/webapp",
       "isSidechain": false
     },
     {
@@ -89,7 +89,7 @@
       "created": "2026-04-12T15:00:00.000Z",
       "modified": "2026-04-12T16:00:00.000Z",
       "gitBranch": "infra/redis-7",
-      "projectPath": "/home/dev/infra",
+      "projectPath": "/tmp/cctv-demo/infra",
       "isSidechain": false
     },
     {
@@ -102,7 +102,7 @@
       "created": "2026-04-11T09:00:00.000Z",
       "modified": "2026-04-11T11:30:00.000Z",
       "gitBranch": "fix/arm64-ci",
-      "projectPath": "/home/dev/infra",
+      "projectPath": "/tmp/cctv-demo/infra",
       "isSidechain": false
     }
   ]
