@@ -1,0 +1,2 @@
+{"type":"permission-mode","permissionMode":"default","sessionId":"eeee5555-eeee-eeee-eeee-eeeeeeeeeeee"}
+{"type":"user","parentUuid":null,"isSidechain":false,"promptId":"prompt-1","type":"user","message":{"role":"user","content":[{"type":"text","text":"Structured content message"}]},"uuid":"uuid-1","timestamp":"2026-03-01T10:00:00.000Z","permissionMode":"default","userType":"external","entrypoint":"cli","cwd":"/home/user/project","sessionId":"eeee5555-eeee-eeee-eeee-eeeeeeeeeeee","version":"2.1.100","gitBranch":"feature"}

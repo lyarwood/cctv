@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "sessionId": "aaaa1111-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "fullPath": "/tmp/cctv-test/projects/test-project/aaaa1111-aaaa-aaaa-aaaa-aaaaaaaaaaaa.jsonl",
+      "fileMtime": 1769178371694,
+      "firstPrompt": "How do I write tests?",
+      "summary": "Writing unit tests in Go",
+      "messageCount": 14,
+      "created": "2026-01-07T10:38:14.731Z",
+      "modified": "2026-01-07T10:57:39.144Z",
+      "gitBranch": "main",
+      "projectPath": "/home/user/myproject",
+      "isSidechain": false
+    },
+    {
+      "sessionId": "bbbb2222-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+      "fullPath": "/tmp/cctv-test/projects/test-project/bbbb2222-bbbb-bbbb-bbbb-bbbbbbbbbbbb.jsonl",
+      "fileMtime": 1769178000000,
+      "firstPrompt": "Fix the login bug",
+      "summary": "Debugging auth middleware",
+      "messageCount": 8,
+      "created": "2026-01-06T09:00:00.000Z",
+      "modified": "2026-01-06T09:30:00.000Z",
+      "gitBranch": "fix/auth",
+      "projectPath": "/home/user/myproject",
+      "isSidechain": false
+    },
+    {
+      "sessionId": "cccc3333-cccc-cccc-cccc-cccccccccccc",
+      "fullPath": "/tmp/cctv-test/projects/test-project/cccc3333-cccc-cccc-cccc-cccccccccccc.jsonl",
+      "fileMtime": 1769178000000,
+      "firstPrompt": "internal agent work",
+      "summary": "subagent task",
+      "messageCount": 3,
+      "created": "2026-01-06T08:00:00.000Z",
+      "modified": "2026-01-06T08:10:00.000Z",
+      "gitBranch": "main",
+      "projectPath": "/home/user/myproject",
+      "isSidechain": true
+    }
+  ]
+}
