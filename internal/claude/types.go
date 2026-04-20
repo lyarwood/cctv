@@ -26,6 +26,7 @@ type Session struct {
 	HasJSONL     bool
 	Source       SessionSource
 	PRLinks      []PRLink
+	TotalTokens  int64
 }
 
 type PRLink struct {

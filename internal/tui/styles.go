@@ -20,6 +20,9 @@ var (
 	statsValueStyle    lipgloss.Style
 	statsBarFill       lipgloss.Style
 	statsBarEmpty      lipgloss.Style
+	tokensLowStyle     lipgloss.Style
+	tokensMedStyle     lipgloss.Style
+	tokensHighStyle    lipgloss.Style
 )
 
 func init() {
@@ -101,4 +104,13 @@ func applyTheme() {
 
 	statsBarEmpty = lipgloss.NewStyle().
 		Foreground(t.BarEmpty)
+
+	tokensLowStyle = lipgloss.NewStyle().
+		Foreground(t.TokensLow)
+
+	tokensMedStyle = lipgloss.NewStyle().
+		Foreground(t.TokensMed)
+
+	tokensHighStyle = lipgloss.NewStyle().
+		Foreground(t.TokensHigh)
 }

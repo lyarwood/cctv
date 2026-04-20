@@ -133,6 +133,7 @@ func printJSON(sessions []claude.Session) error {
 		Modified     string   `json:"modified"`
 		IsRunning    bool     `json:"isRunning"`
 		PRLinks      []jsonPR `json:"prLinks,omitempty"`
+		TotalTokens  int64    `json:"totalTokens,omitempty"`
 	}
 
 	out := make([]jsonSession, len(sessions))
@@ -147,6 +148,7 @@ func printJSON(sessions []claude.Session) error {
 			Created:      s.Created.Format(time.RFC3339),
 			Modified:     s.Modified.Format(time.RFC3339),
 			IsRunning:    s.IsRunning,
+			TotalTokens:  s.TotalTokens,
 		}
 		for _, pr := range s.PRLinks {
 			out[i].PRLinks = append(out[i].PRLinks, jsonPR{
@@ -164,7 +166,7 @@ func printJSON(sessions []claude.Session) error {
 
 func printTable(sessions []claude.Session) error {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	_, _ = fmt.Fprintln(w, "STATUS\tSUMMARY\tPROJECT\tBRANCH\tPR\tMSGS\tMODIFIED")
+	_, _ = fmt.Fprintln(w, "STATUS\tSUMMARY\tPROJECT\tBRANCH\tPR\tTOKENS\tMSGS\tMODIFIED")
 
 	for _, s := range sessions {
 		status := " "
@@ -178,9 +180,13 @@ func printTable(sessions []claude.Session) error {
 		project := filepath.Base(s.ProjectPath)
 		modified := relativeTime(s.Modified)
 		pr := formatCLIPRLinks(s.PRLinks)
+		tokens := ""
+		if s.TotalTokens > 0 {
+			tokens = formatTokens(s.TotalTokens)
+		}
 
-		_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%d\t%s\n",
-			status, summary, project, s.GitBranch, pr, s.MessageCount, modified)
+		_, _ = fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%d\t%s\n",
+			status, summary, project, s.GitBranch, pr, tokens, s.MessageCount, modified)
 	}
 	return w.Flush()
 }
@@ -194,6 +200,16 @@ func formatCLIPRLinks(links []claude.PRLink) string {
 		return fmt.Sprintf("%s +%d", first, len(links)-1)
 	}
 	return first
+}
+
+func formatTokens(n int64) string {
+	if n >= 1_000_000 {
+		return fmt.Sprintf("%.1fM", float64(n)/1_000_000)
+	}
+	if n >= 1_000 {
+		return fmt.Sprintf("%.1fK", float64(n)/1_000)
+	}
+	return fmt.Sprintf("%d", n)
 }
 
 func truncate(s string, max int) string {

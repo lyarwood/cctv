@@ -30,6 +30,13 @@ var _ = Describe("JSONL Parsing", func() {
 			Expect(session.Created).NotTo(BeZero())
 		})
 
+		It("aggregates total tokens from assistant messages", func() {
+			session, err := claude.ParseJSONLMetadata(filepath.Join(testdataDir, "session-basic.jsonl"))
+			Expect(err).NotTo(HaveOccurred())
+			// msg1: 100 input + 50 output = 150; msg2: 150 input + 75 output = 225; total = 375
+			Expect(session.TotalTokens).To(Equal(int64(375)))
+		})
+
 		It("handles structured content blocks", func() {
 			session, err := claude.ParseJSONLMetadata(filepath.Join(testdataDir, "session-structured-content.jsonl"))
 			Expect(err).NotTo(HaveOccurred())

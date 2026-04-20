@@ -17,6 +17,9 @@ type Theme struct {
 	StatsHighlight  lipgloss.Color
 	BarFill         lipgloss.Color
 	BarEmpty        lipgloss.Color
+	TokensLow       lipgloss.Color
+	TokensMed       lipgloss.Color
+	TokensHigh      lipgloss.Color
 }
 
 var themes = map[string]Theme{
@@ -35,6 +38,9 @@ var themes = map[string]Theme{
 		StatsHighlight: lipgloss.Color("42"),
 		BarFill:        lipgloss.Color("42"),
 		BarEmpty:       lipgloss.Color("240"),
+		TokensLow:      lipgloss.Color("42"),
+		TokensMed:      lipgloss.Color("214"),
+		TokensHigh:     lipgloss.Color("196"),
 	},
 	"catppuccin": {
 		Name:           "catppuccin",
@@ -51,6 +57,9 @@ var themes = map[string]Theme{
 		StatsHighlight: lipgloss.Color("#a6e3a1"),
 		BarFill:        lipgloss.Color("#a6e3a1"),
 		BarEmpty:       lipgloss.Color("#45475a"),
+		TokensLow:      lipgloss.Color("#a6e3a1"),
+		TokensMed:      lipgloss.Color("#f9e2af"),
+		TokensHigh:     lipgloss.Color("#f38ba8"),
 	},
 	"dracula": {
 		Name:           "dracula",
@@ -67,6 +76,9 @@ var themes = map[string]Theme{
 		StatsHighlight: lipgloss.Color("#50fa7b"),
 		BarFill:        lipgloss.Color("#50fa7b"),
 		BarEmpty:       lipgloss.Color("#44475a"),
+		TokensLow:      lipgloss.Color("#50fa7b"),
+		TokensMed:      lipgloss.Color("#f1fa8c"),
+		TokensHigh:     lipgloss.Color("#ff5555"),
 	},
 	"nord": {
 		Name:           "nord",
@@ -83,6 +95,9 @@ var themes = map[string]Theme{
 		StatsHighlight: lipgloss.Color("#a3be8c"),
 		BarFill:        lipgloss.Color("#a3be8c"),
 		BarEmpty:       lipgloss.Color("#4c566a"),
+		TokensLow:      lipgloss.Color("#a3be8c"),
+		TokensMed:      lipgloss.Color("#ebcb8b"),
+		TokensHigh:     lipgloss.Color("#bf616a"),
 	},
 	"light": {
 		Name:           "light",
@@ -99,6 +114,9 @@ var themes = map[string]Theme{
 		StatsHighlight: lipgloss.Color("28"),
 		BarFill:        lipgloss.Color("28"),
 		BarEmpty:       lipgloss.Color("250"),
+		TokensLow:      lipgloss.Color("28"),
+		TokensMed:      lipgloss.Color("136"),
+		TokensHigh:     lipgloss.Color("124"),
 	},
 }
 

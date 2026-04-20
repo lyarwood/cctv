@@ -83,6 +83,7 @@ func (d *Discoverer) discoverProject(projectDir string) ([]Session, error) {
 					sessions[i].Source = SourceBoth
 					if parsed, err := ParseJSONLMetadata(path); err == nil {
 						sessions[i].PRLinks = parsed.PRLinks
+						sessions[i].TotalTokens = parsed.TotalTokens
 					}
 					break
 				}

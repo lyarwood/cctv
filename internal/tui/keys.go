@@ -8,6 +8,7 @@ type keyMap struct {
 	Enter   key.Binding
 	Detail  key.Binding
 	Stats   key.Binding
+	New     key.Binding
 	Filter  key.Binding
 	Refresh key.Binding
 	Help    key.Binding
@@ -35,6 +36,10 @@ var keys = keyMap{
 	Stats: key.NewBinding(
 		key.WithKeys("s"),
 		key.WithHelp("s", "session stats"),
+	),
+	New: key.NewBinding(
+		key.WithKeys("n"),
+		key.WithHelp("n", "new session"),
 	),
 	Filter: key.NewBinding(
 		key.WithKeys("/"),

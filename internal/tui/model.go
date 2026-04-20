@@ -16,6 +16,16 @@ import (
 	"github.com/lyarwood/cctv/internal/claude"
 )
 
+func newSession(session claude.Session) tea.Cmd {
+	c := exec.Command("claude")
+	if info, err := os.Stat(session.ProjectPath); err == nil && info.IsDir() {
+		c.Dir = session.ProjectPath
+	}
+	return tea.ExecProcess(c, func(err error) tea.Msg {
+		return sessionResumedMsg{err: err}
+	})
+}
+
 func resumeSession(session claude.Session) tea.Cmd {
 	c := exec.Command("claude", "--resume", session.SessionID)
 	if info, err := os.Stat(session.ProjectPath); err == nil && info.IsDir() {
@@ -167,6 +177,11 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.err = nil
 			session := m.filtered[m.cursor]
 			return m, m.loadDetail(session)
+		}
+
+	case matchKey(msg, keys.New):
+		if len(m.filtered) > 0 {
+			return m, newSession(m.filtered[m.cursor])
 		}
 
 	case matchKey(msg, keys.Filter):
@@ -385,7 +400,7 @@ func (m Model) View() string {
 	} else if m.filterText != "" {
 		footer = helpStyle.Render("active filter: "+m.filterText+"  /:edit  ?:help  q:quit")
 	} else if m.showHelp {
-		footer = helpStyle.Render("enter:resume  d/space:detail  s:stats  /:filter  r:refresh  ?:help  esc:back  q:quit")
+		footer = helpStyle.Render("enter:resume  n:new  d/space:detail  s:stats  /:filter  r:refresh  ?:help  esc:back  q:quit")
 	} else {
 		footer = helpStyle.Render("?:help  q:quit")
 	}

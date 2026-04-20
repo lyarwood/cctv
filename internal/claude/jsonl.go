@@ -55,6 +55,12 @@ func ParseJSONLMetadata(path string) (*Session, error) {
 				}
 				foundUser = true
 			}
+		case "assistant":
+			var a jsonlAssistant
+			if err := json.Unmarshal(line, &a); err != nil {
+				continue
+			}
+			session.TotalTokens += a.Message.Usage.InputTokens + a.Message.Usage.OutputTokens
 		case "pr-link":
 			var pr jsonlPRLink
 			if err := json.Unmarshal(line, &pr); err != nil {
