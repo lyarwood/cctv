@@ -56,6 +56,17 @@ Sleep 300ms
 Enter
 Sleep 1s
 
+# Content search - find a session mentioning "OpenAPI"
+Type "\\"
+Sleep 500ms
+Type "OpenAPI"
+Enter
+Sleep 2s
+
+# Clear search results
+Escape
+Sleep 1s
+
 # Resume a session - navigate to the API review session
 Down
 Sleep 300ms
