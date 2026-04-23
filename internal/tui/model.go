@@ -58,20 +58,32 @@ type sessionResumedMsg struct {
 	err error
 }
 
+type searchResultsMsg struct {
+	results []claude.SearchResult
+	query   string
+	err     error
+}
+
 type Model struct {
-	view        viewState
-	sessions    []claude.Session
-	filtered    []claude.Session
-	cursor      int
-	detail      *claude.SessionDetail
-	err         error
-	width       int
-	height      int
-	filterInput textinput.Model
-	filtering   bool
-	filterText  string
-	showHelp    bool
-	discoverer  *claude.Discoverer
+	view             viewState
+	sessions         []claude.Session
+	filtered         []claude.Session
+	cursor           int
+	detail           *claude.SessionDetail
+	err              error
+	width            int
+	height           int
+	filterInput      textinput.Model
+	filtering        bool
+	filterText       string
+	searchInput      textinput.Model
+	searching        bool
+	searchInProgress bool
+	searchText       string
+	searchResults    []claude.SearchResult
+	searchActive     bool
+	showHelp         bool
+	discoverer       *claude.Discoverer
 }
 
 func NewModel(sessions []claude.Session, discoverer *claude.Discoverer, initialFilter string) Model {
@@ -83,11 +95,16 @@ func NewModel(sessions []claude.Session, discoverer *claude.Discoverer, initialF
 		ti.SetValue(initialFilter)
 	}
 
+	si := textinput.New()
+	si.Placeholder = "search conversation content..."
+	si.CharLimit = 200
+
 	return Model{
 		sessions:    sessions,
 		filtered:    sessions,
 		filterInput: ti,
 		filterText:  initialFilter,
+		searchInput: si,
 		discoverer:  discoverer,
 	}
 }
@@ -123,7 +140,26 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case sessionResumedMsg:
 		return m, nil
 
+	case searchResultsMsg:
+		m.searchInProgress = false
+		if msg.err != nil {
+			m.err = msg.err
+		} else {
+			m.searchResults = msg.results
+			m.searchText = msg.query
+			m.searchActive = true
+			m.filtered = make([]claude.Session, len(msg.results))
+			for i, r := range msg.results {
+				m.filtered[i] = r.Session
+			}
+			m.cursor = 0
+		}
+		return m, nil
+
 	case tea.KeyMsg:
+		if m.searching {
+			return m.updateSearching(msg)
+		}
 		if m.filtering {
 			return m.updateFiltering(msg)
 		}
@@ -189,6 +225,21 @@ func (m Model) updateList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.filterInput.Focus()
 		return m, textinput.Blink
 
+	case matchKey(msg, keys.Search):
+		m.searching = true
+		m.searchInput.Focus()
+		return m, textinput.Blink
+
+	case matchKey(msg, keys.Back):
+		if m.searchActive {
+			m.searchActive = false
+			m.searchResults = nil
+			m.searchText = ""
+			m.searchInput.SetValue("")
+			m.applyFilter(m.filterText)
+			return m, nil
+		}
+
 	case matchKey(msg, keys.Refresh):
 		return m, m.refreshSessions()
 
@@ -231,6 +282,44 @@ func (m Model) updateStats(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func (m Model) updateSearching(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "enter":
+		query := m.searchInput.Value()
+		if query == "" {
+			m.searching = false
+			m.searchInput.Blur()
+			return m, nil
+		}
+		m.searching = false
+		m.searchInput.Blur()
+		m.searchInProgress = true
+		return m, m.executeSearch(query)
+
+	case "esc":
+		m.searching = false
+		m.searchInput.Blur()
+		m.searchInput.SetValue(m.searchText)
+		return m, nil
+	}
+
+	var cmd tea.Cmd
+	m.searchInput, cmd = m.searchInput.Update(msg)
+	return m, cmd
+}
+
+func (m Model) executeSearch(query string) tea.Cmd {
+	sessions := m.filtered
+	if m.searchActive {
+		sessions = MatchSessions(m.sessions, m.filterText)
+	}
+	discoverer := m.discoverer
+	return func() tea.Msg {
+		results, err := discoverer.SearchAll(sessions, query, 100)
+		return searchResultsMsg{results: results, query: query, err: err}
+	}
 }
 
 func (m Model) updateFiltering(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -378,7 +467,7 @@ func (m Model) View() string {
 	var content string
 	switch m.view {
 	case viewList:
-		content = renderSessionList(m.filtered, m.cursor, m.width, m.height-3, m.filterText)
+		content = renderSessionList(m.filtered, m.cursor, m.width, m.height-3, m.filterText, m.searchResults)
 	case viewDetail:
 		if len(m.filtered) > 0 {
 			content = renderDetail(m.filtered[m.cursor], m.detail, m.width, m.height-3)
@@ -395,12 +484,23 @@ func (m Model) View() string {
 	}
 
 	var footer string
-	if m.filtering {
+	if m.searching {
+		footer = "Search: " + m.searchInput.View() + "  " + helpStyle.Render("enter:search  esc:cancel")
+	} else if m.searchInProgress {
+		footer = helpStyle.Render("Searching conversations...")
+	} else if m.filtering {
 		footer = "Filter: " + m.filterInput.View() + "  " + helpStyle.Render("tab:cycle prefix (project:/branch:/cwd:)  enter:apply  esc:cancel")
+	} else if m.searchActive {
+		count := len(m.searchResults)
+		suffix := ""
+		if count >= 100 {
+			suffix = "+"
+		}
+		footer = helpStyle.Render(fmt.Sprintf("search: %q (%d%s results)  \\:new search  esc:clear  ?:help  q:quit", m.searchText, count, suffix))
 	} else if m.filterText != "" {
 		footer = helpStyle.Render("active filter: "+m.filterText+"  /:edit  ?:help  q:quit")
 	} else if m.showHelp {
-		footer = helpStyle.Render("enter:resume  n:new  d/space:detail  s:stats  /:filter  r:refresh  ?:help  esc:back  q:quit")
+		footer = helpStyle.Render("enter:resume  n:new  d/space:detail  s:stats  /:filter  \\:search  r:refresh  ?:help  esc:back  q:quit")
 	} else {
 		footer = helpStyle.Render("?:help  q:quit")
 	}

@@ -23,6 +23,7 @@ var (
 	tokensLowStyle     lipgloss.Style
 	tokensMedStyle     lipgloss.Style
 	tokensHighStyle    lipgloss.Style
+	searchMatchStyle   lipgloss.Style
 )
 
 func init() {
@@ -113,4 +114,8 @@ func applyTheme() {
 
 	tokensHighStyle = lipgloss.NewStyle().
 		Foreground(t.TokensHigh)
+
+	searchMatchStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(t.Accent)
 }

@@ -11,11 +11,13 @@ import (
 	"github.com/lyarwood/cctv/internal/claude"
 )
 
-func renderSessionList(sessions []claude.Session, cursor int, width, height int, filter string) string {
+func renderSessionList(sessions []claude.Session, cursor int, width, height int, filter string, searchResults []claude.SearchResult) string {
 	if len(sessions) == 0 {
 		msg := "No Claude Code sessions found.\nStart a conversation with `claude` first."
-		if filter != "" {
+		if len(searchResults) == 0 && filter != "" {
 			msg = fmt.Sprintf("No sessions matching %q", filter)
+		} else if searchResults != nil {
+			msg = "No matching conversations found."
 		}
 		return lipgloss.Place(width, height, lipgloss.Center, lipgloss.Center,
 			dimStyle.Render(msg))
@@ -33,9 +35,14 @@ func renderSessionList(sessions []claude.Session, cursor int, width, height int,
 		colSummary = 20
 	}
 
+	summaryHeader := "SUMMARY"
+	if len(searchResults) > 0 {
+		summaryHeader = "MATCH"
+	}
+
 	header := fmt.Sprintf(" %-*s %-*s %-*s %-*s %-*s %*s %*s %-*s",
 		colStatus, " ",
-		colSummary, "SUMMARY",
+		colSummary, summaryHeader,
 		colProject, "PROJECT",
 		colBranch, "BRANCH",
 		colPR, "PR",
@@ -62,7 +69,11 @@ func renderSessionList(sessions []claude.Session, cursor int, width, height int,
 
 	for i := scrollOffset; i < end; i++ {
 		s := sessions[i]
-		row := formatRow(s, colStatus, colSummary, colProject, colBranch, colPR, colTokens, colMsgs, colModified)
+		var snippet *claude.SearchResult
+		if i < len(searchResults) {
+			snippet = &searchResults[i]
+		}
+		row := formatRow(s, colSummary, colProject, colBranch, colPR, colTokens, colMsgs, colModified, snippet)
 		if i == cursor {
 			row = selectedStyle.Width(width).Render(row)
 		} else {
@@ -79,17 +90,22 @@ func renderSessionList(sessions []claude.Session, cursor int, width, height int,
 	return lipgloss.JoinVertical(lipgloss.Left, header, content, statusBar)
 }
 
-func formatRow(s claude.Session, colStatus, colSummary, colProject, colBranch, colPR, colTokens, colMsgs, colModified int) string {
+func formatRow(s claude.Session, colSummary, colProject, colBranch, colPR, colTokens, colMsgs, colModified int, snippet *claude.SearchResult) string {
 	status := "  "
 	if s.IsRunning {
 		status = runningStyle.Render("* ")
 	}
 
-	summary := s.Summary
-	if summary == "" {
-		summary = claude.SanitizePrompt(s.FirstPrompt)
+	var summaryCol string
+	if snippet != nil {
+		summaryCol = renderSnippet(*snippet, colSummary)
+	} else {
+		summary := s.Summary
+		if summary == "" {
+			summary = claude.SanitizePrompt(s.FirstPrompt)
+		}
+		summaryCol = truncateStr(summary, colSummary)
 	}
-	summary = truncateStr(summary, colSummary)
 
 	project := truncateStr(filepath.Base(s.ProjectPath), colProject)
 	branch := truncateStr(s.GitBranch, colBranch)
@@ -109,13 +125,70 @@ func formatRow(s claude.Session, colStatus, colSummary, colProject, colBranch, c
 
 	return fmt.Sprintf(" %s %-*s %-*s %-*s %-*s %*s %*s %-*s",
 		status,
-		colSummary, summary,
+		colSummary, summaryCol,
 		colProject, project,
 		colBranch, branch,
 		colPR, pr,
 		colTokens, tokens,
 		colMsgs, msgs,
 		colModified, modified)
+}
+
+func renderSnippet(sr claude.SearchResult, maxWidth int) string {
+	runes := []rune(sr.Snippet)
+	if len(runes) <= maxWidth {
+		before := string(runes[:sr.MatchPos])
+		matchEnd := sr.MatchPos + sr.MatchLen
+		if matchEnd > len(runes) {
+			matchEnd = len(runes)
+		}
+		matched := string(runes[sr.MatchPos:matchEnd])
+		after := string(runes[matchEnd:])
+		return before + searchMatchStyle.Render(matched) + after
+	}
+
+	matchEnd := sr.MatchPos + sr.MatchLen
+	if matchEnd > len(runes) {
+		matchEnd = len(runes)
+	}
+
+	if matchEnd <= maxWidth-3 {
+		before := string(runes[:sr.MatchPos])
+		matched := string(runes[sr.MatchPos:matchEnd])
+		after := string(runes[matchEnd : maxWidth-3])
+		return before + searchMatchStyle.Render(matched) + after + "..."
+	}
+
+	start := sr.MatchPos - (maxWidth-sr.MatchLen-6)/2
+	if start < 0 {
+		start = 0
+	}
+	end := start + maxWidth - 6
+	if end > len(runes) {
+		end = len(runes)
+		start = max(end-maxWidth+3, 0)
+	}
+
+	newMatchPos := sr.MatchPos - start
+	newMatchEnd := matchEnd - start
+	if newMatchEnd > end-start {
+		newMatchEnd = end - start
+	}
+
+	sub := runes[start:end]
+	before := string(sub[:newMatchPos])
+	matched := string(sub[newMatchPos:newMatchEnd])
+	after := string(sub[newMatchEnd:])
+
+	prefix := ""
+	suffix := ""
+	if start > 0 {
+		prefix = "..."
+	}
+	if end < len(runes) {
+		suffix = "..."
+	}
+	return prefix + before + searchMatchStyle.Render(matched) + after + suffix
 }
 
 func colorizeTokens(tokens int64, width int) string {

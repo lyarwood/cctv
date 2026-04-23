@@ -132,3 +132,10 @@ type jsonlPRLink struct {
 	URL        string `json:"prUrl"`
 	Repository string `json:"prRepository"`
 }
+
+type SearchResult struct {
+	Session  Session
+	Snippet  string
+	MatchPos int
+	MatchLen int
+}

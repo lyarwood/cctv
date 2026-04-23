@@ -10,6 +10,7 @@ type keyMap struct {
 	Stats   key.Binding
 	New     key.Binding
 	Filter  key.Binding
+	Search  key.Binding
 	Refresh key.Binding
 	Help    key.Binding
 	Back    key.Binding
@@ -44,6 +45,10 @@ var keys = keyMap{
 	Filter: key.NewBinding(
 		key.WithKeys("/"),
 		key.WithHelp("/", "filter"),
+	),
+	Search: key.NewBinding(
+		key.WithKeys("\\"),
+		key.WithHelp("\\", "search content"),
 	),
 	Refresh: key.NewBinding(
 		key.WithKeys("r"),

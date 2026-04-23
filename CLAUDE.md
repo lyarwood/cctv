@@ -17,7 +17,7 @@ make demo           # regenerate demo.gif (requires vhs)
 ## Architecture
 
 - `internal/claude/` — data layer: parses `~/.claude/projects/*/sessions-index.json` (fast metadata), `*.jsonl` (full conversations with PR links, token usage, models), and `sessions/<pid>.json` (running session detection). The `Discoverer` merges all sources into a unified `[]Session` sorted by modified time.
-- `internal/tui/` — Bubble Tea TUI with three views (list, detail, and stats popup). The stats popup (`s` key) shows token usage, cache hit rate, and session duration. Filtering is live (updates on every keystroke) with regex support and prefix syntax (`project:`, `branch:`, `cwd:`, `pr:`). Multiple space-separated terms are ANDed. Invalid regex falls back to substring matching. Theming is in `theme.go` — a `Theme` struct defines named colors, `styles.go` derives all Lip Gloss styles from the active theme via `applyTheme()`. 5 built-in themes: default, catppuccin, dracula, nord, light. Selected via `--theme` flag.
+- `internal/tui/` — Bubble Tea TUI with three views (list, detail, and stats popup). The stats popup (`s` key) shows token usage, cache hit rate, and session duration. Filtering is live (updates on every keystroke) with regex support and prefix syntax (`project:`, `branch:`, `cwd:`, `pr:`). Multiple space-separated terms are ANDed. Invalid regex falls back to substring matching. Content search (`\` key) searches through JSONL conversation content (both user and assistant messages) for a string or regex — results replace the session list with match snippets highlighted. Theming is in `theme.go` — a `Theme` struct defines named colors, `styles.go` derives all Lip Gloss styles from the active theme via `applyTheme()`. 5 built-in themes: default, catppuccin, dracula, nord, light. Selected via `--theme` flag.
 - `internal/cmd/` — Cobra commands: root (launches TUI), `list` (non-interactive), `resume` (exec into claude), `version`.
 - `internal/claude/sanitize.go` — cleans raw prompts: extracts slash command names from XML tags, replaces `<local-command-caveat>` with `[local command]`, shortens URLs, strips remaining XML.
 
@@ -31,7 +31,7 @@ make demo           # regenerate demo.gif (requires vhs)
 ## Key design decisions
 
 - `tea.ExecProcess` suspends the TUI when resuming a session, returning to cctv after Claude exits. The command's `Dir` is set to `session.ProjectPath` if the directory exists, otherwise it inherits the current directory.
-- JSONL parsing uses `bufio.Scanner` line-by-line for memory efficiency. `ParseJSONLMetadata` scans the full file to collect PR links. `ParseJSONLDetail` is loaded on-demand for the detail view.
+- JSONL parsing uses `bufio.Scanner` line-by-line for memory efficiency. `ParseJSONLMetadata` scans the full file to collect PR links. `ParseJSONLDetail` is loaded on-demand for the detail view. `SearchJSONL` scans for content matches, stopping at the first hit per file.
 - PR links are deduplicated by `repo#number`. When a session exists in both the index and as a JSONL file, discovery parses the JSONL to extract PR links.
 - Filter values are compiled as case-insensitive regex patterns. Invalid patterns fall back to substring matching.
 - Sidechain sessions (subagent conversations) are filtered out.
