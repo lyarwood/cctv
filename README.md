@@ -21,10 +21,13 @@ Claude Code's built-in `--resume` picker is functional but minimal. cctv gives y
 
 - Lists all Claude Code sessions across all projects with metadata (summary, project, branch, PR links, message count, timestamps, running status)
 - Live filtering with regex support and prefix syntax (`project:`, `branch:`, `cwd:`, `pr:`)
-- Stats popup with token usage, cache hit rate, session duration, and model breakdown
-- Detail view with model info, token usage, prompt history, and PR details
+- Content search (`\`) — search through JSONL conversation content for strings or regex, with match snippets highlighted
+- Resume cost estimation — shows estimated API cost to resume each session based on context size, model, and prompt cache state (warm/cold)
+- Stats popup with token usage, cache hit rate, session duration, model breakdown, and resume cost
+- Detail view with model info, token usage, prompt history, PR details, and resume cost
 - Resume any session directly from the TUI — suspends cctv, launches Claude Code, returns when done
 - Non-interactive `list` subcommand with `--json` output for scripting
+- Configurable model pricing via `~/.config/cctv/pricing.json` — override built-in rates for custom providers (e.g., Google Vertex AI, AWS Bedrock)
 - 5 built-in color themes (`default`, `catppuccin`, `dracula`, `nord`, `light`) via `--theme`
 - Sanitizes raw prompts — slash commands, local commands, and XML tags are cleaned up for readability
 
@@ -56,8 +59,9 @@ cctv --pwd        # filter to sessions from the present working directory
 |---|---|
 | `enter` | Resume selected session |
 | `d` / `space` | View session details |
-| `s` | Session stats popup (token usage, cache hit rate, duration) |
+| `s` | Session stats popup (token usage, cache hit rate, resume cost) |
 | `/` | Open filter input |
+| `\` | Search conversation content |
 | `tab` | Cycle filter prefix (`project:`, `branch:`, `cwd:`, `pr:`) |
 | `r` | Refresh session list |
 | `?` | Toggle help |
@@ -85,6 +89,22 @@ pr:242 branch:fix
 ```
 
 Invalid regex patterns fall back to substring matching.
+
+#### Resume cost estimation
+
+The list view, detail view, and stats popup show an estimated API cost to resume each session. The estimate is based on the last turn's context size (input + cached tokens) and the model's per-million-token pricing. The stats popup also indicates whether the prompt cache is likely warm (modified < 5 minutes ago) or cold.
+
+Built-in pricing covers Anthropic's direct API rates. To override for custom providers (e.g., Google Vertex AI with regional endpoint premium), create `~/.config/cctv/pricing.json`:
+
+```json
+{
+  "claude-opus-4-6": {"input": 5.50, "cache_hit": 0.55},
+  "claude-sonnet-4-6": {"input": 3.30, "cache_hit": 0.33},
+  "claude-haiku-4-5": {"input": 1.10, "cache_hit": 0.11}
+}
+```
+
+Entries merge into the built-in table — only list models you want to override. Prices are per million tokens. You can also pass `--pricing /path/to/pricing.json` to use a specific file.
 
 #### Themes
 
@@ -157,6 +177,8 @@ internal/
     running.go                    # Running session detection
     discovery.go                  # Unified session discovery
     sanitize.go                   # Prompt text sanitization
+    pricing.go                    # Model pricing table and cost estimation
+    search.go                     # Content search across JSONL files
   cmd/                            # Cobra CLI commands
     root.go                       # Root command (launches TUI)
     list.go                       # Non-interactive listing
