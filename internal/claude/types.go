@@ -25,8 +25,10 @@ type Session struct {
 	FullPath     string
 	HasJSONL     bool
 	Source       SessionSource
-	PRLinks      []PRLink
-	TotalTokens  int64
+	PRLinks         []PRLink
+	TotalTokens     int64
+	LastModel       string
+	LastInputTokens int64
 }
 
 type PRLink struct {
@@ -36,12 +38,13 @@ type PRLink struct {
 }
 
 type SessionDetail struct {
-	Models     []string
-	TotalUsage TokenUsage
-	LastPrompt string
-	Version    string
-	Prompts    []PromptEntry
-	PRLinks    []PRLink
+	Models          []string
+	TotalUsage      TokenUsage
+	LastInputTokens int64
+	LastPrompt      string
+	Version         string
+	Prompts         []PromptEntry
+	PRLinks         []PRLink
 }
 
 type TokenUsage struct {

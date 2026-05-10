@@ -96,6 +96,23 @@ func renderStats(session claude.Session, detail *claude.SessionDetail, width int
 			b.WriteString(statsLabelStyle.Render(""))
 			b.WriteString(renderBar(outputRatio, 30))
 			b.WriteString("\n")
+
+			if detail.LastInputTokens > 0 && len(detail.Models) > 0 {
+				model := detail.Models[len(detail.Models)-1]
+				coldCost, warmCost := claude.EstimateResumeCost(model, detail.LastInputTokens)
+				if coldCost > 0 {
+					b.WriteString("\n")
+					b.WriteString(statsSectionStyle.Render("Resume Cost"))
+					b.WriteString("\n")
+					row("Context", formatTokens(detail.LastInputTokens)+" tokens")
+					cacheAge := time.Since(session.Modified)
+					if cacheAge < 5*time.Minute {
+						row("Est. Cost", fmt.Sprintf("~$%.4f (cache warm, %s left)", warmCost, formatDuration(5*time.Minute-cacheAge)))
+					} else {
+						row("Est. Cost", fmt.Sprintf("~$%.4f (cache cold)", coldCost))
+					}
+				}
+			}
 		}
 	} else if session.HasJSONL {
 		b.WriteString("\n")

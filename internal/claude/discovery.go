@@ -84,6 +84,8 @@ func (d *Discoverer) discoverProject(projectDir string) ([]Session, error) {
 					if parsed, err := ParseJSONLMetadata(path); err == nil {
 						sessions[i].PRLinks = parsed.PRLinks
 						sessions[i].TotalTokens = parsed.TotalTokens
+						sessions[i].LastModel = parsed.LastModel
+						sessions[i].LastInputTokens = parsed.LastInputTokens
 					}
 					break
 				}

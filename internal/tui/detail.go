@@ -74,6 +74,13 @@ func renderDetail(session claude.Session, detail *claude.SessionDetail, width, h
 			if detail.TotalUsage.CacheReadInputTokens > 0 {
 				row("Cache Read", formatTokens(detail.TotalUsage.CacheReadInputTokens))
 			}
+			if detail.LastInputTokens > 0 && len(detail.Models) > 0 {
+				model := detail.Models[len(detail.Models)-1]
+				coldCost, _ := claude.EstimateResumeCost(model, detail.LastInputTokens)
+				if coldCost > 0 {
+					row("Resume Cost", fmt.Sprintf("~$%.4f (uncached)", coldCost))
+				}
+			}
 		}
 
 		if len(detail.Prompts) > 0 {

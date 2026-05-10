@@ -26,11 +26,12 @@ func renderSessionList(sessions []claude.Session, cursor int, width, height int,
 	colStatus := 3
 	colMsgs := 6
 	colTokens := 9
+	colCost := 9
 	colModified := 12
 	colBranch := 18
 	colProject := 20
 	colPR := 30
-	colSummary := width - colStatus - colMsgs - colTokens - colModified - colBranch - colProject - colPR - 14
+	colSummary := width - colStatus - colMsgs - colTokens - colCost - colModified - colBranch - colProject - colPR - 16
 	if colSummary < 20 {
 		colSummary = 20
 	}
@@ -40,13 +41,14 @@ func renderSessionList(sessions []claude.Session, cursor int, width, height int,
 		summaryHeader = "MATCH"
 	}
 
-	header := fmt.Sprintf(" %-*s %-*s %-*s %-*s %-*s %*s %*s %-*s",
+	header := fmt.Sprintf(" %-*s %-*s %-*s %-*s %-*s %*s %*s %*s %-*s",
 		colStatus, " ",
 		colSummary, summaryHeader,
 		colProject, "PROJECT",
 		colBranch, "BRANCH",
 		colPR, "PR",
 		colTokens, "TOKENS",
+		colCost, "COST",
 		colMsgs, "MSGS",
 		colModified, "MODIFIED")
 	header = headerStyle.Width(width).Render(header)
@@ -73,7 +75,7 @@ func renderSessionList(sessions []claude.Session, cursor int, width, height int,
 		if i < len(searchResults) {
 			snippet = &searchResults[i]
 		}
-		row := formatRow(s, colSummary, colProject, colBranch, colPR, colTokens, colMsgs, colModified, snippet)
+		row := formatRow(s, colSummary, colProject, colBranch, colPR, colTokens, colCost, colMsgs, colModified, snippet)
 		if i == cursor {
 			row = selectedStyle.Width(width).Render(row)
 		} else {
@@ -90,7 +92,7 @@ func renderSessionList(sessions []claude.Session, cursor int, width, height int,
 	return lipgloss.JoinVertical(lipgloss.Left, header, content, statusBar)
 }
 
-func formatRow(s claude.Session, colSummary, colProject, colBranch, colPR, colTokens, colMsgs, colModified int, snippet *claude.SearchResult) string {
+func formatRow(s claude.Session, colSummary, colProject, colBranch, colPR, colTokens, colCost, colMsgs, colModified int, snippet *claude.SearchResult) string {
 	status := "  "
 	if s.IsRunning {
 		status = runningStyle.Render("* ")
@@ -111,27 +113,43 @@ func formatRow(s claude.Session, colSummary, colProject, colBranch, colPR, colTo
 	branch := truncateStr(s.GitBranch, colBranch)
 	pr := truncateStr(formatPRLinks(s.PRLinks), colPR)
 
-	tokens := ""
+	tokens := fmt.Sprintf("%*s", colTokens, "")
 	if s.TotalTokens > 0 {
 		tokens = colorizeTokens(s.TotalTokens, colTokens)
 	}
 
-	msgs := ""
-	if s.MessageCount > 0 {
-		msgs = fmt.Sprintf("%d", s.MessageCount)
+	cost := fmt.Sprintf("%*s", colCost, "")
+	if s.LastInputTokens > 0 && s.LastModel != "" {
+		coldCost, _ := claude.EstimateResumeCost(s.LastModel, s.LastInputTokens)
+		if coldCost > 0 {
+			cost = padRight(formatCost(coldCost), colCost)
+		}
 	}
 
-	modified := formatRelativeTime(s.Modified)
+	msgs := fmt.Sprintf("%*s", colMsgs, "")
+	if s.MessageCount > 0 {
+		msgs = fmt.Sprintf("%*d", colMsgs, s.MessageCount)
+	}
 
-	return fmt.Sprintf(" %s %-*s %-*s %-*s %-*s %*s %*s %-*s",
+	modified := fmt.Sprintf("%-*s", colModified, formatRelativeTime(s.Modified))
+
+	return fmt.Sprintf(" %s %-*s %-*s %-*s %-*s %s %s %s %s",
 		status,
 		colSummary, summaryCol,
 		colProject, project,
 		colBranch, branch,
 		colPR, pr,
-		colTokens, tokens,
-		colMsgs, msgs,
-		colModified, modified)
+		tokens,
+		cost,
+		msgs,
+		modified)
+}
+
+func formatCost(cost float64) string {
+	if cost >= 1.0 {
+		return fmt.Sprintf("$%.2f", cost)
+	}
+	return fmt.Sprintf("$%.4f", cost)
 }
 
 func renderSnippet(sr claude.SearchResult, maxWidth int) string {
@@ -192,7 +210,7 @@ func renderSnippet(sr claude.SearchResult, maxWidth int) string {
 }
 
 func colorizeTokens(tokens int64, width int) string {
-	text := formatTokenCount(tokens)
+	text := fmt.Sprintf("%*s", width, formatTokenCount(tokens))
 	style := tokensLowStyle
 	switch {
 	case tokens >= 500_000:
@@ -201,6 +219,13 @@ func colorizeTokens(tokens int64, width int) string {
 		style = tokensMedStyle
 	}
 	return style.Render(text)
+}
+
+func padRight(s string, width int) string {
+	if len(s) >= width {
+		return s[:width]
+	}
+	return fmt.Sprintf("%-*s", width, s)
 }
 
 func formatTokenCount(n int64) string {

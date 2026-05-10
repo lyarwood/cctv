@@ -61,6 +61,12 @@ func ParseJSONLMetadata(path string) (*Session, error) {
 				continue
 			}
 			session.TotalTokens += a.Message.Usage.InputTokens + a.Message.Usage.OutputTokens
+			if a.Message.Model != "" {
+				session.LastModel = a.Message.Model
+			}
+			session.LastInputTokens = a.Message.Usage.InputTokens +
+				a.Message.Usage.CacheReadInputTokens +
+				a.Message.Usage.CacheCreationInputTokens
 		case "pr-link":
 			var pr jsonlPRLink
 			if err := json.Unmarshal(line, &pr); err != nil {
@@ -138,6 +144,9 @@ func ParseJSONLDetail(path string) (*SessionDetail, error) {
 			detail.TotalUsage.OutputTokens += a.Message.Usage.OutputTokens
 			detail.TotalUsage.CacheCreationInputTokens += a.Message.Usage.CacheCreationInputTokens
 			detail.TotalUsage.CacheReadInputTokens += a.Message.Usage.CacheReadInputTokens
+			detail.LastInputTokens = a.Message.Usage.InputTokens +
+				a.Message.Usage.CacheReadInputTokens +
+				a.Message.Usage.CacheCreationInputTokens
 
 		case "last-prompt":
 			var lp jsonlLastPrompt
