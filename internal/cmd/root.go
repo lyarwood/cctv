@@ -15,15 +15,19 @@ import (
 var Version = "dev"
 
 var (
-	claudeDir string
-	usePWD    bool
-	themeName string
+	claudeDir   string
+	usePWD      bool
+	themeName   string
+	pricingFile string
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "cctv",
 	Short: "Claude Code TUI Viewer - browse and resume Claude Code conversations",
 	Long:  "cctv discovers Claude Code conversations from the local filesystem and displays them in a TUI. Select a session to resume it.",
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		return claude.LoadPricingOverrides(pricingFile)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if themeName != "" {
 			if !tui.SetTheme(themeName) {
@@ -56,6 +60,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&claudeDir, "claude-dir", "", "path to Claude Code data directory (default: ~/.claude)")
+	rootCmd.PersistentFlags().StringVar(&pricingFile, "pricing", "", "path to pricing overrides JSON (default: ~/.config/cctv/pricing.json)")
 	rootCmd.Flags().BoolVar(&usePWD, "pwd", false, "filter sessions by present working directory")
 	rootCmd.Flags().StringVar(&themeName, "theme", "", "color theme (default, catppuccin, dracula, nord, light)")
 	rootCmd.AddCommand(listCmd)

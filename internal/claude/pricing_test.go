@@ -1,6 +1,10 @@
 package claude_test
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -74,5 +78,60 @@ var _ = Describe("EstimateResumeCost", func() {
 		cold, warm := claude.EstimateResumeCost("claude-opus-4-6", 0)
 		Expect(cold).To(Equal(0.0))
 		Expect(warm).To(Equal(0.0))
+	})
+})
+
+var _ = Describe("LoadPricingOverrides", func() {
+	It("returns nil for missing file", func() {
+		Expect(claude.LoadPricingOverrides("/nonexistent/pricing.json")).To(Succeed())
+	})
+
+	It("overrides existing model pricing", func() {
+		origP, _ := claude.LookupPricing("claude-opus-4-6")
+		defer func() {
+			dir2 := GinkgoT().TempDir()
+			restore := filepath.Join(dir2, "restore.json")
+			data := []byte(`{"claude-opus-4-6": {"input": ` +
+				fmt.Sprintf("%g", origP.InputPerMTok) + `, "cache_hit": ` +
+				fmt.Sprintf("%g", origP.CacheHitPerMTok) + `}}`)
+			Expect(os.WriteFile(restore, data, 0644)).To(Succeed())
+			Expect(claude.LoadPricingOverrides(restore)).To(Succeed())
+		}()
+
+		dir := GinkgoT().TempDir()
+		path := filepath.Join(dir, "pricing.json")
+		Expect(os.WriteFile(path, []byte(`{
+			"claude-opus-4-6": {"input": 10.0, "cache_hit": 1.0}
+		}`), 0644)).To(Succeed())
+
+		Expect(claude.LoadPricingOverrides(path)).To(Succeed())
+
+		p, ok := claude.LookupPricing("claude-opus-4-6")
+		Expect(ok).To(BeTrue())
+		Expect(p.InputPerMTok).To(Equal(10.0))
+		Expect(p.CacheHitPerMTok).To(Equal(1.0))
+	})
+
+	It("adds new model pricing", func() {
+		dir := GinkgoT().TempDir()
+		path := filepath.Join(dir, "pricing.json")
+		Expect(os.WriteFile(path, []byte(`{
+			"my-custom-model": {"input": 7.50, "cache_hit": 0.75}
+		}`), 0644)).To(Succeed())
+
+		Expect(claude.LoadPricingOverrides(path)).To(Succeed())
+
+		p, ok := claude.LookupPricing("my-custom-model")
+		Expect(ok).To(BeTrue())
+		Expect(p.InputPerMTok).To(Equal(7.50))
+		Expect(p.CacheHitPerMTok).To(Equal(0.75))
+	})
+
+	It("returns error for invalid JSON", func() {
+		dir := GinkgoT().TempDir()
+		path := filepath.Join(dir, "pricing.json")
+		Expect(os.WriteFile(path, []byte(`not json`), 0644)).To(Succeed())
+
+		Expect(claude.LoadPricingOverrides(path)).NotTo(Succeed())
 	})
 })

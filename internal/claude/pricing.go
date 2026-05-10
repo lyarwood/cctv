@@ -1,13 +1,16 @@
 package claude
 
 import (
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
 
 type ModelPricing struct {
-	InputPerMTok    float64
-	CacheHitPerMTok float64
+	InputPerMTok    float64 `json:"input"`
+	CacheHitPerMTok float64 `json:"cache_hit"`
 }
 
 var modelPricing = map[string]ModelPricing{
@@ -33,6 +36,31 @@ var modelPricing = map[string]ModelPricing{
 	// Haiku 3 ($0.25 input, $0.03 cache hit)
 	"claude-haiku-3":    {0.25, 0.03},
 	"claude-3-haiku":    {0.25, 0.03},
+}
+
+func LoadPricingOverrides(path string) error {
+	if path == "" {
+		configDir, err := os.UserConfigDir()
+		if err != nil {
+			return nil
+		}
+		path = filepath.Join(configDir, "cctv", "pricing.json")
+	}
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	var overrides map[string]ModelPricing
+	if err := json.Unmarshal(data, &overrides); err != nil {
+		return err
+	}
+	for model, pricing := range overrides {
+		modelPricing[NormalizeModel(model)] = pricing
+	}
+	return nil
 }
 
 var dateStripRe = regexp.MustCompile(`-\d{8}$`)
